@@ -6,10 +6,11 @@ button { cursor: pointer; }
 .scanlines { position: fixed; inset: 0; pointer-events: none; opacity: .1; background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.18) 4px); mix-blend-mode: overlay; }
 .desktop { min-height: 100vh; position: relative; }
 .topbar, .taskbar { display: flex; align-items: center; justify-content: space-between; background: rgba(4, 12, 16, .86); border-bottom: 1px solid rgba(255,255,255,.14); padding: 15px 24px; letter-spacing: .12em; font-size: 12px; }
-.brand, .topbar-status, .hero-row, .device-head, .session-meta, .pair-row, .mic-controls, .typed-row { display: flex; align-items: center; gap: 12px; }
+.brand, .topbar-status, .topbar-actions, .hero-row, .device-head, .session-meta, .pair-row, .mic-controls, .typed-row { display: flex; align-items: center; gap: 12px; }
 .brand { font-weight: 800; }
 .brand-mark { display: grid; place-items: center; width: 27px; height: 27px; color: var(--ink); background: var(--orange); border-radius: 5px; font-weight: 900; }
 .status-light { width: 8px; height: 8px; background: #9b5d58; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+.play-game { color: #17252a; background: #f2a53a; border: 2px outset #fff; border-radius: 3px; padding: 8px 11px; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-decoration: none; }
 .workspace { position: relative; min-height: calc(100vh - 59px); padding: clamp(34px, 8vw, 110px) clamp(24px, 8vw, 130px); }
 .wallpaper-copy { max-width: 480px; text-shadow: 0 2px 10px #041014; }
 .eyebrow { margin: 0 0 8px; color: var(--orange); font-size: 10px; letter-spacing: .2em; font-weight: 800; }
@@ -78,6 +79,7 @@ body::before {
 .topbar { border-left: 0; border-right: 0; }
 .brand-mark { border-radius: 0; color: #fff; background: #008080; border: 2px outset #75ffff; }
 .status-light { border-radius: 0; background: #ff9b25; }
+.play-game { color: #fff; background: #008080; border-radius: 0; border: 2px outset #75ffff; }
 .workspace { isolation: isolate; }
 .wallpaper-copy { position: absolute; left: 32px; bottom: 85px; max-width: 340px; z-index: 1; color: #fff; text-shadow: 1px 1px #003b42; }
 .wallpaper-copy h1 { font-size: 28px; letter-spacing: -.02em; line-height: 1.1; margin-bottom: 10px; }
