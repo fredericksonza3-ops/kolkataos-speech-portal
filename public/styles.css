@@ -45,3 +45,115 @@ input:focus { border-color: var(--orange); box-shadow: 0 0 0 2px rgba(242,165,58
 .mic-controls { flex-wrap: wrap; } .mic-button { flex: 1; min-width: 210px; padding: 15px; background: var(--orange); color: var(--ink); font-size: 15px; } .mic-button.active { background: #e26752; color: white; box-shadow: 0 0 0 3px rgba(226,103,82,.17); }
 .typed-row { margin-top: 12px; } .typed-row button { flex: 0 0 auto; } .footer-note { margin-top: 22px; font-size: 11px; }
 @media (max-width: 560px) { .app-icon { top: 30px; right: 22px; } .app-glyph { width: 60px; height: 60px; font-size: 30px; } .hero-row { display: block; } .mic-orb { display: none; } .pair-row, .typed-row { align-items: stretch; } .pair-row { flex-direction: column; } #pair-code { max-width: none; } .pair-row button { width: 100%; } }
+
+/* KolkataOS skin: teal wallpaper, navy title bars, grey system surfaces, pixel-art icons. */
+:root {
+  --os-navy: #000080;
+  --os-teal: #087f83;
+  --os-grey: #c0c0c0;
+  --os-light: #ffffff;
+  --os-shadow: #404040;
+}
+body {
+  color: #111;
+  background: #087f83 url("/icons/wallpaper.png") center center / cover fixed no-repeat;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(0, 38, 50, .35), rgba(0, 128, 128, .08));
+}
+.topbar, .taskbar {
+  position: relative;
+  z-index: 1;
+  background: var(--os-navy);
+  color: #fff;
+  border: 2px outset #5f5fff;
+  border-top: 0;
+  padding: 8px 12px;
+  letter-spacing: .1em;
+}
+.topbar { border-left: 0; border-right: 0; }
+.brand-mark { border-radius: 0; color: #fff; background: #008080; border: 2px outset #75ffff; }
+.status-light { border-radius: 0; background: #ff9b25; }
+.workspace { isolation: isolate; }
+.wallpaper-copy { position: absolute; left: 32px; bottom: 85px; max-width: 340px; z-index: 1; color: #fff; text-shadow: 1px 1px #003b42; }
+.wallpaper-copy h1 { font-size: 28px; letter-spacing: -.02em; line-height: 1.1; margin-bottom: 10px; }
+.wallpaper-copy .eyebrow { color: #fff; }
+.app-icon { top: 28px; left: 24px; right: auto; z-index: 2; color: #fff; text-shadow: 1px 1px #003b42; }
+.app-glyph {
+  padding: 7px;
+  color: #111;
+  background: #c0c0c0;
+  border: 3px outset #fff;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 rgba(0,0,0,.35);
+}
+.app-glyph img, .mic-orb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.taskbar { position: fixed; z-index: 4; border-bottom: 0; border-top: 2px outset #fff; }
+.start-chip, .task-title {
+  color: #111;
+  background: #c0c0c0;
+  border: 2px outset #fff;
+  padding: 5px 10px;
+  text-shadow: none;
+}
+.clock { color: #fff; }
+.window {
+  background: var(--os-grey);
+  color: #111;
+  border: 3px outset #fff;
+  box-shadow: 8px 8px 0 rgba(0,0,0,.38);
+  backdrop-filter: none;
+}
+.window-title {
+  background: var(--os-navy);
+  color: #fff;
+  border-bottom: 2px solid #404040;
+  padding: 6px 8px;
+  font-weight: 800;
+}
+.window-dot { border-radius: 0; background: #00a0a0; border: 1px outset #fff; }
+.window-title button { color: #fff; }
+.window-body { background: #c0c0c0; }
+.muted, .hint, .footer-note { color: #303030; }
+.eyebrow, label, .transcript-time { color: #000080; }
+.mic-orb {
+  width: 92px;
+  height: 92px;
+  padding: 12px;
+  border-radius: 0;
+  background: #087f83;
+  border: 3px outset #fff;
+  box-shadow: 5px 5px 0 rgba(0,0,0,.3);
+}
+.pair-card, .device-card {
+  border: 2px inset #fff;
+  background: #d8d8d8;
+}
+input {
+  color: #111;
+  background: #fff;
+  border: 2px inset #fff;
+  border-radius: 0;
+}
+input:focus { border-color: #000080; box-shadow: 0 0 0 1px #000080; }
+.primary, .secondary, .ghost, .mic-button {
+  border-radius: 0;
+  border: 2px outset #fff;
+}
+.primary { background: #000080; color: #fff; }
+.secondary { background: #008080; color: #fff; }
+.ghost { color: #111; background: #c0c0c0; border-color: #fff; }
+.transcript-box { background: #fff; border: 2px inset #fff; }
+.placeholder { color: #606060; }
+.transcript-line { color: #111; }
+.mic-button { background: #f2a53a; color: #111; }
+.mic-button.active { background: #d45c45; color: #fff; }

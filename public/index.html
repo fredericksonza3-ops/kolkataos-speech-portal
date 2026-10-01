@@ -16,7 +16,7 @@
     <section class="workspace">
       <div class="wallpaper-copy"><p class="eyebrow">CREW SUPPORT TERMINAL</p><h1>Desk microphone</h1><p>Connect a browser microphone to your live game session.</p></div>
       <button class="app-icon" id="microphone-icon" type="button" aria-label="Open Microphone app">
-        <span class="app-glyph">♫</span><span>Microphone</span>
+        <span class="app-glyph"><img src="/icons/mic.png" alt="" /></span><span>Microphone</span>
       </button>
       <div class="taskbar"><span class="start-chip">◎ START</span><span class="task-title">Microphone</span><span class="clock" id="clock"></span></div>
     </section>
@@ -25,7 +25,7 @@
   <section class="window hidden" id="microphone-window" aria-labelledby="microphone-title">
     <div class="window-title"><div><span class="window-dot"></span><span id="microphone-title">Microphone</span></div><button id="close-window" type="button" aria-label="Close">×</button></div>
     <div class="window-body">
-      <div class="hero-row"><div><p class="eyebrow">VOICE INPUT DEVICE</p><h2>Speak through the desk</h2><p class="muted">Pair this page with the code shown in your Roblox session, then hold the microphone button while you speak.</p></div><div class="mic-orb" id="mic-orb">♫</div></div>
+      <div class="hero-row"><div><p class="eyebrow">VOICE INPUT DEVICE</p><h2>Speak through the desk</h2><p class="muted">Pair this page with the code shown in your Roblox session, then click Start microphone. Click again to stop.</p></div><div class="mic-orb" id="mic-orb"><img src="/icons/mic.png" alt="" /></div></div>
       <div class="pair-card" id="pair-card"><label for="pair-code">SESSION PAIRING CODE</label><div class="pair-row"><input id="pair-code" maxlength="6" inputmode="text" autocomplete="one-time-code" placeholder="ABC123" /><button class="primary" id="pair-button" type="button">Connect</button></div><p class="hint" id="pair-status">Enter the six-character code from the game.</p></div>
       <div class="device-card hidden" id="device-card"><div class="device-head"><div><p class="eyebrow">CONNECTED SESSION</p><h3 id="player-name">Player</h3></div><button class="ghost" id="disconnect-button" type="button">Disconnect</button></div><div class="session-meta"><span id="session-code">CODE —</span><span id="session-expires">EXPIRES —</span></div><div class="transcript-box" id="transcript-box"><p class="placeholder">Your sent lines will appear here.</p></div><div class="mic-controls"><button class="mic-button" id="mic-button" type="button"><span id="mic-icon">●</span><span id="mic-label">Start microphone</span></button><button class="ghost" id="send-test" type="button">Send typed line</button></div><div class="typed-row"><input id="typed-text" placeholder="Fallback: type a line to send…" maxlength="1000" /><button class="secondary" id="typed-send" type="button">Send</button></div><p class="hint" id="mic-status">Microphone is idle.</p></div>
       <div class="footer-note">Browser speech recognition may ask for microphone access. Roblox still filters the transcript on the game server before anyone sees it.</div>

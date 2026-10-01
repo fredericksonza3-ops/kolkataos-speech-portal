@@ -1,3 +1,8 @@
 # KolkataOS assets
 
-Drop the final wallpaper and icon files in this folder when they are ready. The current UI uses a CSS fallback and a text glyph, so the site works before the art arrives. To add an icon, replace the `.app-glyph` element in `public/index.html` with an image or add a background image in `public/styles.css`.
+The live UI assets are served from `public/icons/`:
+
+- `public/icons/wallpaper.png` is the desktop wallpaper.
+- `public/icons/mic.png` is the Microphone app icon.
+
+Replace those files with new art while keeping the filenames to update the site without changing the UI code.
