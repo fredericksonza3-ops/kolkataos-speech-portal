@@ -7,7 +7,7 @@ This folder is a self-contained website and API for the browser Microphone app. 
 ```bash
 copy .env.example .env
 # edit SPEECH_PORTAL_KEY in .env
-npm start
+npm run dev
 ```
 
 The server listens on `http://localhost:8787` by default. For a hosted deployment, set `PUBLIC_URL` to the public HTTPS URL and set a strong `SPEECH_PORTAL_KEY`.
