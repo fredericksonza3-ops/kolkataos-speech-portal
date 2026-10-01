@@ -1,4 +1,4 @@
-import { handle } from "../server.js";
+import { handle } from "../lib/portal.js";
 
 export default function api(req, res) {
   return handle(req, res).catch((error) => {
