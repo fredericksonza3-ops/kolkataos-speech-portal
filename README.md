@@ -22,6 +22,27 @@ The Roblox server calls `POST /api/v1/game/sessions` with `x-speech-portal-key`.
 
 The API stores only a short in-memory queue. Restarting the process ends active links, and the process should run behind HTTPS in production.
 
+## Roblox setup
+
+1. In `Match/src/ServerScriptService/SpeechPortalConfig/source.luau`, set the public URL:
+
+   ```lua
+   return {
+       URL = 'https://kolkataos-speech-portal.vercel.app',
+       SERVER_KEY = '',
+   }
+   ```
+
+   Keep `SERVER_KEY` empty for production. The server script reads the secret store first.
+
+2. In Roblox Studio, open **File → Experience Settings → Security**, enable **Allow HTTP Requests**, and add a local secret named `SPEECH_PORTAL_SERVER_KEY` with the exact same value as Vercel's `SPEECH_PORTAL_KEY`. Roblox's `HttpService:GetSecret()` reads this value only from server scripts; local secrets are intended for Studio testing. See the [Roblox secrets documentation](https://create.roblox.com/docs/cloud-services/secrets).
+
+3. For the published experience, create the same `SPEECH_PORTAL_SERVER_KEY` secret in the experience's Creator Dashboard secret store. Do not put the key in a LocalScript, the website, or a public module.
+
+4. Sync/build the `Match/match.project.json` project and publish the place. `SpeechPortalService` creates one pairing session per player and polls the Vercel API. During an active Phone call, the `+` button beside the microphone shows the code and instructions.
+
+5. Open the Vercel website, launch **Microphone**, enter the code, allow browser microphone access, and press **Start microphone**. The transcript is sent to the game server, where `SpeechService` applies Roblox filtering before displaying or using it.
+
 ## Hosting notes
 
 Use any Node 18+ host that supports a long-running process. Set the environment variables from `.env.example` and enable HTTPS. Put the public URL in `Match/src/ServerScriptService/SpeechPortalConfig/source.luau` (`URL = 'https://your-host.example'`) and add the same server key as the `SPEECH_PORTAL_SERVER_KEY` Roblox secret. If your host uses a start command, use `npm start`.
