@@ -14,13 +14,15 @@ The server listens on `http://localhost:8787` by default. For a hosted deploymen
 
 ## Deploy on Vercel
 
-Import this `speech-portal` folder as the Vercel project root. Vercel will use `api/index.js` for the API and `vercel.json` to serve the `public` UI. Add `SPEECH_PORTAL_KEY` in the Vercel project environment variables and set `PUBLIC_URL` to the production URL if you want generated links to use a custom domain. The API currently keeps active sessions in memory, so a server restart expires links; for a larger production deployment, move the session map to Redis or another shared store.
+Import this `speech-portal` folder as the Vercel project root. Vercel will use `api/index.js` for the API and `vercel.json` to serve the `public` UI. Add `SPEECH_PORTAL_KEY` in the Vercel project environment variables and set `PUBLIC_URL` to the production URL if you want generated links to use a custom domain.
+
+Connect an Upstash Redis database to the Vercel project before using the live Roblox bridge. The integration supplies `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`; add them to Production, Preview, and Development if you use those environments. The portal stores sessions and transcript queues in Redis so the Roblox poll and browser speech requests can reach different Vercel function instances safely. Without those variables, local development uses an in-memory fallback and sessions are not reliable on Vercel.
 
 ## API contract
 
 The Roblox server calls `POST /api/v1/game/sessions` with `x-speech-portal-key`. The response contains a six-character `code`, `sessionId`, `pollToken`, and `portalUrl`. The player enters the code on the Microphone app. The browser posts transcript lines to `/api/v1/sessions/:id/transcripts`; Roblox polls `/api/v1/game/sessions/:id/transcripts?after=N` using both the server key and session token.
 
-The API stores only a short in-memory queue. Restarting the process ends active links, and the process should run behind HTTPS in production.
+The API stores only a short transcript queue per session. Redis expires sessions automatically after `SESSION_TTL_MS`; the process should run behind HTTPS in production.
 
 ## Roblox setup
 
