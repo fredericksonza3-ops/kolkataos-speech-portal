@@ -40,11 +40,17 @@ function addLine(text) {
 async function jsonRequest(url, options = {}) {
   const response = await fetch(api + url, { ...options, headers: { "content-type": "application/json", ...(options.headers || {}) } });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body.error || `Request failed (${response.status})`);
+  if (!response.ok) {
+    const error = new Error(body.error || `Request failed (${response.status})`);
+    error.status = response.status;
+    error.code = body.code;
+    throw error;
+  }
   return body;
 }
 
 async function attach() {
+  if ($("pair-button").disabled) return;
   const code = $("pair-code").value.trim().toUpperCase();
   if (code.length !== 6) return setStatus("Enter the six-character code from Roblox.", true);
   $("pair-button").disabled = true;
@@ -76,16 +82,26 @@ function newStreamId() {
   return window.crypto?.randomUUID?.() || `speech-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-async function sendTranscript(text, { partial = false, streamId = null } = {}) {
-  if (!session) throw new Error("Connect a Roblox session first.");
+async function sendTranscript(text, { partial = false, streamId = null, targetSession = session } = {}) {
+  // A queued result belongs to the session captured when recognition emitted it.
+  // Never send it into a newly paired window/session after a disconnect.
+  if (!targetSession || targetSession !== session) return;
   text = String(text || "").trim();
   if (!text) return;
-  await jsonRequest(`/api/v1/sessions/${encodeURIComponent(session.sessionId)}/transcripts`, {
-    method: "POST",
-    headers: { "x-speech-session-token": session.browserToken },
-    body: JSON.stringify({ text, partial, streamId }),
-  });
-  if (!partial) addLine(text);
+  try {
+    await jsonRequest(`/api/v1/sessions/${encodeURIComponent(targetSession.sessionId)}/transcripts`, {
+      method: "POST",
+      headers: { "x-speech-session-token": targetSession.browserToken },
+      body: JSON.stringify({ text, partial, streamId }),
+    });
+  } catch (error) {
+    if (targetSession === session && (error.status === 401 || error.code === "storage_not_configured")) {
+      disconnect(error.message);
+      setStatus(error.message, true);
+    }
+    throw error;
+  }
+  if (!partial && targetSession === session) addLine(text);
 }
 
 async function sendText(text) {
@@ -106,8 +122,9 @@ function queueSpeech(text) {
   lastSentText = normalized;
   lastSentAt = Date.now();
   const streamId = liveStreamId;
+  const targetSession = session;
   sendQueue = sendQueue.then(async () => {
-    await sendTranscript(normalized, { streamId });
+    await sendTranscript(normalized, { streamId, targetSession });
     if (listening) micStatus("Line sent to Roblox. Keep speaking or click to stop.");
   }).catch((error) => micStatus(error.message, true));
 }
@@ -120,7 +137,8 @@ function queuePartial(text) {
   lastPartialText = normalized;
   lastPartialSentAt = now;
   const streamId = liveStreamId;
-  sendQueue = sendQueue.then(() => sendTranscript(normalized, { partial: true, streamId })).catch((error) => micStatus(error.message, true));
+  const targetSession = session;
+  sendQueue = sendQueue.then(() => sendTranscript(normalized, { partial: true, streamId, targetSession })).catch((error) => micStatus(error.message, true));
 }
 
 function scheduleRecognitionRestart(delay = 180) {
@@ -240,5 +258,8 @@ $("send-test").addEventListener("click", () => $("typed-text").focus());
 setInterval(updateExpiry, 30_000);
 setInterval(() => { $("clock").textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }, 1000);
 setConnection(false);
+jsonRequest("/api/v1/health").catch((error) => {
+  if (!session) setStatus(error.code === "storage_not_configured" ? error.message : "The portal is not ready. Check Redis configuration in Vercel and redeploy.", true);
+});
 const queryCode = new URLSearchParams(location.search).get("code");
 if (queryCode) { $("microphone-window").classList.remove("hidden"); $("pair-code").value = queryCode; }

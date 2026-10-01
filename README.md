@@ -18,6 +18,8 @@ Import this `speech-portal` folder as the Vercel project root. Vercel will use `
 
 Connect an Upstash Redis database to the Vercel project before using the live Roblox bridge. The integration supplies `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`; add them to Production, Preview, and Development if you use those environments. The portal stores sessions and transcript queues in Redis so the Roblox poll and browser speech requests can reach different Vercel function instances safely. Without those variables, local development uses an in-memory fallback and sessions are not reliable on Vercel.
 
+After redeploying, open `/api/v1/health`. It must return `{"storage":"redis"}`. If it reports `memory` or `storage_not_configured`, the live project is not connected to shared storage yet.
+
 ## API contract
 
 The Roblox server calls `POST /api/v1/game/sessions` with `x-speech-portal-key`. The response contains a six-character `code`, `sessionId`, `pollToken`, and `portalUrl`. The player enters the code on the Microphone app. The browser posts transcript lines to `/api/v1/sessions/:id/transcripts`; Roblox polls `/api/v1/game/sessions/:id/transcripts?after=N` using both the server key and session token.
