@@ -8,6 +8,9 @@ let recognitionStarting = false;
 let sendQueue = Promise.resolve();
 let lastSentText = "";
 let lastSentAt = 0;
+let liveStreamId = null;
+let lastPartialText = "";
+let lastPartialSentAt = 0;
 
 function setConnection(online, label = online ? "CONNECTED" : "OFFLINE") {
   $("connection-label").textContent = label;
@@ -69,12 +72,24 @@ function updateExpiry() {
   if (remaining <= 0) disconnect("Session expired.");
 }
 
-async function sendText(text) {
+function newStreamId() {
+  return window.crypto?.randomUUID?.() || `speech-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+async function sendTranscript(text, { partial = false, streamId = null } = {}) {
   if (!session) throw new Error("Connect a Roblox session first.");
   text = String(text || "").trim();
   if (!text) return;
-  await jsonRequest(`/api/v1/sessions/${encodeURIComponent(session.sessionId)}/transcripts`, { method: "POST", headers: { "x-speech-session-token": session.browserToken }, body: JSON.stringify({ text }) });
-  addLine(text);
+  await jsonRequest(`/api/v1/sessions/${encodeURIComponent(session.sessionId)}/transcripts`, {
+    method: "POST",
+    headers: { "x-speech-session-token": session.browserToken },
+    body: JSON.stringify({ text, partial, streamId }),
+  });
+  if (!partial) addLine(text);
+}
+
+async function sendText(text) {
+  return sendTranscript(text);
 }
 
 function micStatus(message, error = false) {
@@ -90,10 +105,22 @@ function queueSpeech(text) {
   if (normalized === lastSentText && Date.now() - lastSentAt < 1500) return;
   lastSentText = normalized;
   lastSentAt = Date.now();
+  const streamId = liveStreamId;
   sendQueue = sendQueue.then(async () => {
-    await sendText(normalized);
+    await sendTranscript(normalized, { streamId });
     if (listening) micStatus("Line sent to Roblox. Keep speaking or click to stop.");
   }).catch((error) => micStatus(error.message, true));
+}
+
+function queuePartial(text) {
+  const normalized = String(text || "").replace(/\s+/g, " ").trim();
+  if (!normalized || !session || !liveStreamId) return;
+  const now = Date.now();
+  if (normalized === lastPartialText || now - lastPartialSentAt < 320) return;
+  lastPartialText = normalized;
+  lastPartialSentAt = now;
+  const streamId = liveStreamId;
+  sendQueue = sendQueue.then(() => sendTranscript(normalized, { partial: true, streamId })).catch((error) => micStatus(error.message, true));
 }
 
 function scheduleRecognitionRestart(delay = 180) {
@@ -121,6 +148,9 @@ function startRecognition() {
   if (listening) return;
   if (restartTimer) { clearTimeout(restartTimer); restartTimer = null; }
   lastSentText = "";
+  lastPartialText = "";
+  lastPartialSentAt = 0;
+  liveStreamId = newStreamId();
   recognition = new SpeechRecognition();
   recognition.continuous = true;
   recognition.interimResults = true;
@@ -141,8 +171,16 @@ function startRecognition() {
       if (event.results[i].isFinal) finalText += `${transcript} `;
       else interimText += transcript;
     }
-    if (interimText.trim()) micStatus(`Hearing: ${interimText.trim()}`);
-    if (finalText.trim()) queueSpeech(finalText);
+    if (finalText.trim()) {
+      queueSpeech(finalText);
+      liveStreamId = newStreamId();
+      lastPartialText = "";
+      lastPartialSentAt = 0;
+    }
+    if (interimText.trim()) {
+      micStatus(`Hearing: ${interimText.trim()}`);
+      queuePartial(interimText);
+    }
   };
   recognition.onerror = (event) => {
     recognitionStarting = false;
@@ -181,6 +219,8 @@ function stopRecognition() {
   const activeRecognition = recognition;
   recognition = null;
   recognitionStarting = false;
+  liveStreamId = null;
+  lastPartialText = "";
   if (activeRecognition) { try { activeRecognition.stop(); } catch {} }
   $("mic-button").classList.remove("active");
   $("mic-label").textContent = "Start microphone";
