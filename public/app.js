@@ -3,6 +3,11 @@ const api = "";
 let session = null;
 let recognition = null;
 let listening = false;
+let restartTimer = null;
+let recognitionStarting = false;
+let sendQueue = Promise.resolve();
+let lastSentText = "";
+let lastSentAt = 0;
 
 function setConnection(online, label = online ? "CONNECTED" : "OFFLINE") {
   $("connection-label").textContent = label;
@@ -72,29 +77,116 @@ async function sendText(text) {
   addLine(text);
 }
 
+function micStatus(message, error = false) {
+  const node = $("mic-status");
+  node.textContent = message;
+  node.style.color = error ? "#9c1c1c" : "";
+}
+
+function queueSpeech(text) {
+  const normalized = String(text || "").replace(/\s+/g, " ").trim();
+  if (!normalized) return;
+  // Chrome can repeat the last final result when it restarts recognition.
+  if (normalized === lastSentText && Date.now() - lastSentAt < 1500) return;
+  lastSentText = normalized;
+  lastSentAt = Date.now();
+  sendQueue = sendQueue.then(async () => {
+    await sendText(normalized);
+    if (listening) micStatus("Line sent to Roblox. Keep speaking or click to stop.");
+  }).catch((error) => micStatus(error.message, true));
+}
+
+function scheduleRecognitionRestart(delay = 180) {
+  if (!listening || restartTimer) return;
+  restartTimer = setTimeout(() => {
+    restartTimer = null;
+    if (!listening || !recognition || recognitionStarting) return;
+    try {
+      recognitionStarting = true;
+      recognition.start();
+    } catch (error) {
+      recognitionStarting = false;
+      if (error.name !== "InvalidStateError") micStatus("Could not restart the microphone. Try clicking Stop, then Start again.", true);
+      scheduleRecognitionRestart(500);
+    }
+  }, delay);
+}
+
 function startRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    $("mic-status").textContent = "This browser has no speech recognition. Use the typed fallback below.";
+    micStatus("This browser has no speech recognition. Use Chrome or Edge, or use the typed fallback below.", true);
     return;
   }
+  if (listening) return;
+  if (restartTimer) { clearTimeout(restartTimer); restartTimer = null; }
+  lastSentText = "";
   recognition = new SpeechRecognition();
   recognition.continuous = true;
   recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
   recognition.lang = navigator.language || "en-US";
-  recognition.onstart = () => { listening = true; $("mic-button").classList.add("active"); $("mic-label").textContent = "Listening… click to stop"; $("mic-status").textContent = "Listening for a line…"; };
-  recognition.onresult = async (event) => {
-    let finalText = "";
-    for (let i = event.resultIndex; i < event.results.length; i += 1) if (event.results[i].isFinal) finalText += `${event.results[i][0].transcript} `;
-    if (!finalText.trim()) return;
-    try { await sendText(finalText); $("mic-status").textContent = "Line sent to Roblox. Keep speaking or click to stop."; } catch (error) { $("mic-status").textContent = error.message; }
+  listening = true;
+  recognition.onstart = () => {
+    recognitionStarting = false;
+    $("mic-button").classList.add("active");
+    $("mic-label").textContent = "Listening... click to stop";
+    micStatus("Listening for a line...");
   };
-  recognition.onerror = (event) => { $("mic-status").textContent = `Microphone error: ${event.error}`; };
-  recognition.onend = () => { if (listening) { try { recognition.start(); } catch {} } else { $("mic-button").classList.remove("active"); $("mic-label").textContent = "Start microphone"; } };
-  recognition.start();
+  recognition.onresult = (event) => {
+    let finalText = "";
+    let interimText = "";
+    for (let i = event.resultIndex; i < event.results.length; i += 1) {
+      const transcript = event.results[i][0]?.transcript || "";
+      if (event.results[i].isFinal) finalText += `${transcript} `;
+      else interimText += transcript;
+    }
+    if (interimText.trim()) micStatus(`Hearing: ${interimText.trim()}`);
+    if (finalText.trim()) queueSpeech(finalText);
+  };
+  recognition.onerror = (event) => {
+    recognitionStarting = false;
+    const errors = {
+      "not-allowed": "Microphone permission was blocked. Allow microphone access for this site, then try again.",
+      "service-not-allowed": "This browser blocked its speech service. Try Chrome or Edge.",
+      "audio-capture": "No microphone was found. Check your microphone and browser permissions.",
+      network: "Speech service connection dropped. Reconnecting...",
+      "no-speech": "No speech detected yet. Still listening...",
+    };
+    const message = errors[event.error] || `Microphone error: ${event.error}`;
+    micStatus(message, ["not-allowed", "audio-capture"].includes(event.error));
+    if (["not-allowed", "service-not-allowed", "audio-capture", "language-not-supported"].includes(event.error)) listening = false;
+  };
+  recognition.onend = () => {
+    recognitionStarting = false;
+    if (listening) scheduleRecognitionRestart();
+    else {
+      $("mic-button").classList.remove("active");
+      $("mic-label").textContent = "Start microphone";
+    }
+  };
+  try {
+    recognitionStarting = true;
+    recognition.start();
+  } catch (error) {
+    recognitionStarting = false;
+    listening = false;
+    micStatus("Could not start the microphone. Check the browser permission and try again.", true);
+  }
 }
 
-function stopRecognition() { listening = false; if (recognition) recognition.stop(); recognition = null; $("mic-button").classList.remove("active"); $("mic-label").textContent = "Start microphone"; $("mic-status").textContent = "Microphone is idle."; }
+function stopRecognition() {
+  listening = false;
+  if (restartTimer) { clearTimeout(restartTimer); restartTimer = null; }
+  const activeRecognition = recognition;
+  recognition = null;
+  recognitionStarting = false;
+  if (activeRecognition) { try { activeRecognition.stop(); } catch {} }
+  $("mic-button").classList.remove("active");
+  $("mic-label").textContent = "Start microphone";
+  micStatus("Microphone is idle.");
+}
+
 function disconnect(message = "Disconnected.") { stopRecognition(); session = null; $("device-card").classList.add("hidden"); $("pair-card").classList.remove("hidden"); setStatus(message); setConnection(false); }
 
 $("microphone-icon").addEventListener("click", () => $("microphone-window").classList.remove("hidden"));
