@@ -1,0 +1,13 @@
+{
+  "name": "speech-portal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KolkataOS styled microphone portal for the Roblox speech bridge",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

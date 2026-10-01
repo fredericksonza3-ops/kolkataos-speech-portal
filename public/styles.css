@@ -1,0 +1,47 @@
+:root { font-family: "Segoe UI", system-ui, sans-serif; color: #f6f5ef; background: #071013; --cream: #f7f2df; --ink: #17252a; --orange: #f2a53a; --teal: #1b7e82; --panel: rgba(8, 22, 27, .93); }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; overflow: hidden; background: radial-gradient(circle at 25% 15%, #276d68 0, transparent 35%), linear-gradient(140deg, #051317, #133d43 55%, #0a2228); }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.scanlines { position: fixed; inset: 0; pointer-events: none; opacity: .1; background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.18) 4px); mix-blend-mode: overlay; }
+.desktop { min-height: 100vh; position: relative; }
+.topbar, .taskbar { display: flex; align-items: center; justify-content: space-between; background: rgba(4, 12, 16, .86); border-bottom: 1px solid rgba(255,255,255,.14); padding: 15px 24px; letter-spacing: .12em; font-size: 12px; }
+.brand, .topbar-status, .hero-row, .device-head, .session-meta, .pair-row, .mic-controls, .typed-row { display: flex; align-items: center; gap: 12px; }
+.brand { font-weight: 800; }
+.brand-mark { display: grid; place-items: center; width: 27px; height: 27px; color: var(--ink); background: var(--orange); border-radius: 5px; font-weight: 900; }
+.status-light { width: 8px; height: 8px; background: #9b5d58; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+.workspace { position: relative; min-height: calc(100vh - 59px); padding: clamp(34px, 8vw, 110px) clamp(24px, 8vw, 130px); }
+.wallpaper-copy { max-width: 480px; text-shadow: 0 2px 10px #041014; }
+.eyebrow { margin: 0 0 8px; color: var(--orange); font-size: 10px; letter-spacing: .2em; font-weight: 800; }
+h1 { font-size: clamp(38px, 8vw, 86px); line-height: .94; margin: 0 0 20px; letter-spacing: -.06em; }
+.wallpaper-copy p:last-child { color: #d8e7df; line-height: 1.6; }
+.app-icon { position: absolute; top: 50px; right: 12%; display: grid; gap: 10px; justify-items: center; color: var(--cream); background: transparent; border: 0; font-size: 12px; text-shadow: 0 2px 6px #000; }
+.app-glyph { display: grid; place-items: center; width: 74px; height: 74px; color: var(--ink); background: var(--orange); border: 3px solid #fce1a5; border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,.35); font-size: 38px; }
+.taskbar { position: fixed; bottom: 0; left: 0; right: 0; border-top: 1px solid rgba(255,255,255,.16); border-bottom: 0; padding: 9px 14px; }
+.start-chip, .task-title { padding: 8px 12px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.17); }
+.clock { color: #c6d6cf; }
+.window { position: fixed; z-index: 3; left: 50%; top: 50%; width: min(760px, calc(100vw - 28px)); max-height: calc(100vh - 40px); transform: translate(-50%, -50%); background: var(--panel); border: 1px solid rgba(247,242,223,.35); box-shadow: 0 28px 90px rgba(0,0,0,.6); backdrop-filter: blur(20px); }
+.hidden { display: none !important; }
+.window-title { display: flex; align-items: center; justify-content: space-between; background: #102b30; color: var(--cream); padding: 11px 15px; border-bottom: 1px solid rgba(255,255,255,.16); font-size: 13px; letter-spacing: .1em; }
+.window-title > div { display: flex; align-items: center; gap: 9px; }
+.window-dot { width: 10px; height: 10px; background: var(--orange); border-radius: 2px; }
+.window-title button { background: transparent; color: #d9e5dc; border: 0; font-size: 24px; line-height: 1; }
+.window-body { padding: clamp(18px, 4vw, 32px); overflow: auto; max-height: calc(100vh - 92px); }
+h2, h3 { margin: 0 0 9px; letter-spacing: -.03em; } h2 { font-size: clamp(26px, 5vw, 42px); } h3 { font-size: 21px; }
+.muted, .hint, .footer-note { color: #b9cac1; line-height: 1.55; font-size: 13px; }
+.hero-row { justify-content: space-between; align-items: flex-start; gap: 30px; }
+.mic-orb { display: grid; place-items: center; flex: 0 0 auto; width: 82px; height: 82px; border-radius: 50%; background: #155358; color: var(--orange); font-size: 34px; box-shadow: 0 0 0 8px rgba(242,165,58,.08), 0 0 40px rgba(242,165,58,.2); }
+.pair-card, .device-card { margin-top: 25px; padding: 18px; border: 1px solid rgba(247,242,223,.22); background: rgba(255,255,255,.05); }
+label { display: block; margin-bottom: 9px; font-size: 10px; color: var(--orange); letter-spacing: .18em; font-weight: 800; }
+input { width: 100%; border: 1px solid rgba(247,242,223,.26); background: rgba(0,0,0,.22); color: var(--cream); padding: 12px 13px; outline: 0; border-radius: 3px; }
+input:focus { border-color: var(--orange); box-shadow: 0 0 0 2px rgba(242,165,58,.16); }
+#pair-code { max-width: 230px; letter-spacing: .2em; text-transform: uppercase; font-weight: 800; }
+.primary, .secondary, .ghost, .mic-button { border: 1px solid transparent; border-radius: 3px; padding: 11px 15px; font-weight: 800; }
+.primary { background: var(--orange); color: var(--ink); } .secondary { background: var(--teal); color: var(--cream); } .ghost { color: #d9e5dc; background: transparent; border-color: rgba(247,242,223,.24); }
+.device-head { justify-content: space-between; } .session-meta { justify-content: space-between; color: #9fb6ab; font-size: 11px; letter-spacing: .1em; margin-top: 8px; }
+.transcript-box { min-height: 120px; max-height: 190px; overflow: auto; margin: 18px 0; padding: 13px; background: rgba(0,0,0,.27); border: 1px solid rgba(247,242,223,.13); }
+.placeholder { color: #70857d; font-size: 13px; }
+.transcript-line { margin: 0 0 9px; color: var(--cream); line-height: 1.45; } .transcript-time { color: var(--orange); font-size: 10px; margin-right: 8px; }
+.mic-controls { flex-wrap: wrap; } .mic-button { flex: 1; min-width: 210px; padding: 15px; background: var(--orange); color: var(--ink); font-size: 15px; } .mic-button.active { background: #e26752; color: white; box-shadow: 0 0 0 3px rgba(226,103,82,.17); }
+.typed-row { margin-top: 12px; } .typed-row button { flex: 0 0 auto; } .footer-note { margin-top: 22px; font-size: 11px; }
+@media (max-width: 560px) { .app-icon { top: 30px; right: 22px; } .app-glyph { width: 60px; height: 60px; font-size: 30px; } .hero-row { display: block; } .mic-orb { display: none; } .pair-row, .typed-row { align-items: stretch; } .pair-row { flex-direction: column; } #pair-code { max-width: none; } .pair-row button { width: 100%; } }
